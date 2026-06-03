@@ -1,0 +1,379 @@
+openapi: "3.0.3"
+info:
+  title: "Context API"
+  description: |
+    The Context API allows developers to integrate AI-powered document intelligence, semantic search, and RAG (Retrieval-Augmented Generation) chat into their own applications.
+
+    ## Authentication
+    All API requests require an HTTP Authorization header containing a valid Bearer JWT. You can obtain a token via the `/api/auth/login` endpoint.
+
+    ```http
+    Authorization: Bearer <your_jwt_token>
+    ```
+
+    ## Rate Limiting and Budgets
+    Each developer account is allocated a daily budget of **50,000 tokens**. Endpoints that utilize AI (marked with ⚡) consume this budget. If you exceed your limit, the API will return a `429 Too Many Requests` status, and the `Retry-After` header will indicate when your budget resets (midnight UTC).
+
+    ## SDKs
+    Because this API strictly follows the OpenAPI 3.0 specification, you can automatically generate client SDKs for Python, TypeScript, Go, and more using Swagger Codegen or OpenAPI Generator.
+  version: "1.0.0"
+  termsOfService: "https://context.app/terms"
+  contact:
+    name: "Context Developer Support"
+    url: "https://context.app/support"
+    email: "api-support@context.app"
+  license:
+    name: "Proprietary"
+    url: "https://context.app/license"
+
+servers:
+  - url: "https://api.context.app/v1"
+    description: "Production Environment"
+  - url: "http://localhost:5000"
+    description: "Local Development"
+
+tags:
+  - name: "Authentication"
+    description: "Manage developer access and JWT tokens."
+    externalDocs:
+      description: "Auth Guides"
+      url: "https://docs.context.app/auth"
+  - name: "Documents"
+    description: "Upload, manage, and chat with AI-analyzed documents."
+    externalDocs:
+      description: "Document AI Guides"
+      url: "https://docs.context.app/documents"
+  - name: "Folders"
+    description: "Organize documents using physical and AI-proposed semantic folder structures."
+  - name: "AI Core"
+    description: "Global vector search and multi-document synthesis."
+  - name: "Comparison"
+    description: "Deep semantic analysis and cross-examination between two documents."
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"
+      description: "Standard JWT Bearer token authentication."
+
+  headers:
+    RateLimitLimit:
+      description: "The maximum number of tokens or requests allowed in the current window."
+      schema: { type: "integer" }
+    RateLimitRemaining:
+      description: "The number of tokens or requests remaining in the current window."
+      schema: { type: "integer" }
+    RateLimitReset:
+      description: "The time at which the current rate limit window resets in UTC epoch seconds."
+      schema: { type: "integer" }
+    RetryAfter:
+      description: "Seconds to wait before making a new request (returned on 429)."
+      schema: { type: "integer" }
+
+  schemas:
+    SuccessEnvelope:
+      type: "object"
+      properties:
+        success: { type: "boolean", example: true }
+        message: { type: "string", example: "Operation completed successfully." }
+        data: { type: "object" }
+    ErrorEnvelope:
+      type: "object"
+      properties:
+        success: { type: "boolean", example: false }
+        error: { type: "string", example: "Invalid parameters provided." }
+        stack: { type: "string", description: "Available only in development environments." }
+    TokenBudget429:
+      type: "object"
+      properties:
+        success: { type: "boolean", example: false }
+        error: { type: "string", example: "Daily AI token budget exceeded." }
+        message: { type: "string", example: "Your daily limit of 50,000 tokens has been reached." }
+        tokensUsed: { type: "integer", example: 50000 }
+        limit: { type: "integer", example: 50000 }
+        resetAt: { type: "string", format: "date-time", example: "2026-05-16T00:00:00.000Z" }
+        retryAfterSeconds: { type: "integer", example: 43200 }
+    DocumentMetadata:
+      type: "object"
+      properties:
+        _id: { type: "string", example: "6645f2a3b1e2c3d4e5f60001" }
+        title: { type: "string", example: "Q1_Financial_Report.pdf" }
+        fileType: { type: "string", enum: ["PDF", "Word", "Image", "Excel", "TextSnippet"], example: "PDF" }
+        aiStatus: { type: "string", enum: ["Pending", "Analyzing", "Analyzed", "Failed"], example: "Analyzed" }
+        cognitiveLoad: { type: "string", enum: ["Light", "Medium", "Heavy"], example: "Medium" }
+        folder: { type: "string", example: "6645f2a3b1e2c3d4e5f60099" }
+        createdAt: { type: "string", format: "date-time" }
+    PaginatedDocuments:
+      type: "object"
+      properties:
+        success: { type: "boolean", example: true }
+        count: { type: "integer", example: 10 }
+        total: { type: "integer", example: 145 }
+        page: { type: "integer", example: 1 }
+        totalPages: { type: "integer", example: 15 }
+        data:
+          type: "array"
+          items: { $ref: "#/components/schemas/DocumentMetadata" }
+
+  responses:
+    BadRequest:
+      description: "Bad Request - The request was unacceptable, often due to missing a required parameter."
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+    Unauthorized:
+      description: "Unauthorized - No valid API token provided."
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+    NotFound:
+      description: "Not Found - The requested resource doesn't exist."
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+    TooManyRequests:
+      description: "Too Many Requests - You have hit your rate limit or token budget."
+      headers:
+        Retry-After: { $ref: "#/components/headers/RetryAfter" }
+        X-RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/TokenBudget429" }
+    InternalServer:
+      description: "Internal Server Error - Something went wrong on Context API's end."
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/auth/register:
+    post:
+      tags: ["Authentication"]
+      summary: "Register a developer account"
+      description: "Creates a new developer account. Returns a JWT token that must be used for all subsequent requests."
+      operationId: "registerUser"
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required: ["fullName", "username", "email", "password"]
+              properties:
+                fullName: { type: "string", example: "Jane Doe" }
+                username: { type: "string", example: "janedoe99" }
+                email: { type: "string", format: "email", example: "jane@company.com" }
+                password: { type: "string", format: "password", example: "SecurePass123!" }
+      responses:
+        "201":
+          description: "Account created successfully."
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success: { type: "boolean" }
+                  token: { type: "string" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  /api/auth/login:
+    post:
+      tags: ["Authentication"]
+      summary: "Authenticate account"
+      description: "Exchanges email and password for a Bearer JWT."
+      operationId: "loginUser"
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required: ["email", "password"]
+              properties:
+                email: { type: "string", format: "email" }
+                password: { type: "string", format: "password" }
+      responses:
+        "200":
+          description: "Authenticated successfully."
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success: { type: "boolean" }
+                  token: { type: "string" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/documents:
+    get:
+      tags: ["Documents"]
+      summary: "List documents"
+      description: "Returns a paginated list of documents belonging to the authenticated user."
+      operationId: "listDocuments"
+      parameters:
+        - name: "page"
+          in: "query"
+          description: "Page number to retrieve"
+          schema: { type: "integer", default: 1 }
+        - name: "limit"
+          in: "query"
+          description: "Number of documents per page"
+          schema: { type: "integer", default: 10, maximum: 100 }
+        - name: "sortBy"
+          in: "query"
+          description: "Field to sort by"
+          schema: { type: "string", enum: ["createdAt", "title", "fileSize"], default: "createdAt" }
+        - name: "sortOrder"
+          in: "query"
+          description: "Sort direction"
+          schema: { type: "string", enum: ["asc", "desc"], default: "desc" }
+      responses:
+        "200":
+          description: "A paginated list of documents."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaginatedDocuments" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/InternalServer" }
+
+  /api/documents/upload:
+    post:
+      tags: ["Documents"]
+      summary: "Upload documents ⚡"
+      description: "Uploads physical files (PDF, Word, Images) or TextSnippets. Automatically triggers the background AI pipeline to extract text, summarize, and embed the document for vector search."
+      operationId: "uploadDocuments"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: "object"
+              properties:
+                files:
+                  type: "array"
+                  description: "Up to 5 files (max 10MB each)"
+                  items: { type: "string", format: "binary" }
+      responses:
+        "201":
+          description: "Files uploaded and queued for AI analysis."
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+        "500": { $ref: "#/components/responses/InternalServer" }
+
+  /api/documents/{id}/chat:
+    post:
+      tags: ["Documents"]
+      summary: "Chat with document (RAG) ⚡"
+      description: "Queries the vector store for context chunks strictly within this document, and streams a grounded response from the AI assistant."
+      operationId: "chatWithDocument"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "Unique Document ID"
+          schema: { type: "string" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required: ["message"]
+              properties:
+                message: { type: "string", example: "Summarize the findings in chapter 3." }
+      responses:
+        "200":
+          description: "AI response successfully generated."
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success: { type: "boolean" }
+                  data:
+                    type: "object"
+                    properties:
+                      role: { type: "string" }
+                      content: { type: "string" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /api/ai/search:
+    get:
+      tags: ["AI Core"]
+      summary: "Semantic search ⚡"
+      description: "Executes a global vector search across all of your processed documents."
+      operationId: "globalSemanticSearch"
+      parameters:
+        - name: "q"
+          in: "query"
+          required: true
+          description: "The natural language query"
+          schema: { type: "string" }
+      responses:
+        "200":
+          description: "A list of relevant text chunks and their source documents."
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success: { type: "boolean" }
+                  count: { type: "integer" }
+                  data:
+                    type: "array"
+                    items: { type: "object" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /api/comparison/compare:
+    post:
+      tags: ["Comparison"]
+      summary: "Compare two documents ⚡"
+      description: "Uses a large 70B parameter model (DeepThinkerService) to meticulously analyze similarities, differences, and unique attributes between two specified documents."
+      operationId: "compareDocuments"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required: ["documentIds"]
+              properties:
+                documentIds:
+                  type: "array"
+                  items: { type: "string" }
+                  minItems: 2
+                  maxItems: 2
+      responses:
+        "200":
+          description: "Comparison result object."
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success: { type: "boolean" }
+                  data:
+                    type: "object"
+                    properties:
+                      similarities: { type: "array", items: { type: "string" } }
+                      differences: { type: "array", items: { type: "string" } }
+                      uniqueToA: { type: "array", items: { type: "string" } }
+                      uniqueToB: { type: "array", items: { type: "string" } }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }

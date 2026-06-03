@@ -1,0 +1,643 @@
+{
+  "info": {
+    "_postman_id": "c720afff-3c90-4804-bd99-341ca40a7beb",
+    "name": "Context API (Internal)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Post Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// This script runs automatically after a successful login\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "if (response.success && response.token) {\r",
+                  "    pm.environment.set(\"token\", response.token);\r",
+                  "    console.log(\"Token saved automatically!\");\r",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"ahmed@company.com\",\r\n  \"password\": \"Password123!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Basic Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"fullName\": \"Ahmed El-Kashif\",\r\n  \"username\": \"ahmed_kashif\",\r\n  \"email\": \"ahmed@company.com\",\r\n  \"password\": \"Password123!\",\r\n  \"persona\": \"developer\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/users/profile",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "users",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Profile Updates",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"password\": \"NewPassword999!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/users/profile",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "users",
+                "profile"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        {
+          "name": "Upload Physical File (PDF/Image)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "fileType",
+                  "value": "PDF",
+                  "type": "text"
+                },
+                {
+                  "key": "title",
+                  "value": "My ITI Lecture",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/documents/upload",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "documents",
+                "upload"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Text Snippet",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"fileType\": \"TextSnippet\",\r\n  \"title\": \"React useEffect Note\",\r\n  \"extractedText\": \"Remember to use dependency arrays to prevent infinite loops.\",\r\n  \"tags\": \"[\\\"react\\\", \\\"frontend\\\"]\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/documents/upload",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "documents",
+                "upload"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Documents",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/documents?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "documents"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Document Chat History",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/documents/{{docId}}/chat",
+            "description": "Returns the full RAG chat history for a specific document. Only accessible by the document's owner."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"count\": 4,\n  \"data\": [\n    { \"role\": \"user\",      \"content\": \"What is the main thesis of this paper?\",         \"createdAt\": \"2026-05-15T18:00:00.000Z\" },\n    { \"role\": \"assistant\", \"content\": \"The paper argues that transformer architectures...\", \"createdAt\": \"2026-05-15T18:00:02.000Z\" },\n    { \"role\": \"user\",      \"content\": \"Can you give me an example?\",                    \"createdAt\": \"2026-05-15T18:01:10.000Z\" },\n    { \"role\": \"assistant\", \"content\": \"Sure! In section 3, the authors demonstrate...\",  \"createdAt\": \"2026-05-15T18:01:13.000Z\" }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Chat With Document (RAG)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/documents/{{docId}}/chat",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"What are the key findings in chapter 3?\"\n}"
+            },
+            "description": "RAG chat: retrieves the top 5 most relevant chunks from the document's vector embeddings (filtered strictly by documentId + userId), then generates a context-grounded answer. Saves both turns to chat history."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"role\": \"ai\",\n    \"content\": \"Chapter 3 presents three key findings: (1) the model achieves 94.2% accuracy on the benchmark dataset, (2) training time is reduced by 40% compared to previous approaches, and (3) the architecture generalizes well to low-resource languages.\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🧠 AI Core  (/api/ai)",
+      "item": [
+        {
+          "name": "Organize Folder — Generate Proposal",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/ai/organize-folder",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documents\": [\n    { \"_id\": \"{{docId}}\",  \"title\": \"Q1 Financial Report 2024\" },\n    { \"_id\": \"{{docIdB}}\", \"title\": \"Chocolate Cake Recipe\" }\n  ]\n}"
+            },
+            "description": "Analyzes the provided documents and proposes a hierarchical folder path for each. Requires documents to be pre-analyzed (aiStatus=Analyzed).\n\n⚡ Consumes token budget."
+          },
+          "response": [
+            {
+              "name": "200 OK — Proposal Generated",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"AI successfully mapped documents to semantic folders.\",\n  \"data\": {\n    \"updates\": [\n      { \"documentId\": \"6645f2a3b1e2c3d4e5f60001\", \"newPath\": \"Finance/Reports\" },\n      { \"documentId\": \"6645f2a3b1e2c3d4e5f60002\", \"newPath\": \"Personal/Recipes\" }\n    ]\n  }\n}"
+            },
+            {
+              "name": "429 Token Budget Exceeded",
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Retry-After",
+                  "value": "43200"
+                },
+                {
+                  "key": "X-RateLimit-Limit",
+                  "value": "50000"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "0"
+                },
+                {
+                  "key": "X-RateLimit-Reset",
+                  "value": "2026-05-16T00:00:00.000Z"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": \"Daily AI token budget exceeded.\",\n  \"message\": \"You have used all 50,000 tokens for today. Your budget resets at midnight UTC.\",\n  \"tokensUsed\": 50000,\n  \"limit\": 50000,\n  \"resetAt\": \"2026-05-16T00:00:00.000Z\",\n  \"retryAfterSeconds\": 43200\n}"
+            }
+          ]
+        },
+        {
+          "name": "Apply Folders — Commit Proposal to DB",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/ai/apply-folders",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"updates\": [\n    { \"documentId\": \"{{docId}}\",  \"newPath\": \"Finance/Reports\" },\n    { \"documentId\": \"{{docIdB}}\", \"newPath\": \"Personal/Recipes\" }\n  ]\n}"
+            },
+            "description": "Physically creates the proposed folders in MongoDB and moves documents into them. Pure DB operation — no AI call, no token consumption. Use after organize-folder."
+          },
+          "response": [
+            {
+              "name": "200 OK — Applied",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Physical folder structure generated and documents routed successfully!\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Semantic Search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/ai/search?q=machine+learning",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "machine learning",
+                  "description": "Min 2 characters"
+                }
+              ]
+            },
+            "description": "Global vector search across ALL of the user's embedded documents using Atlas VectorSearch. Strictly isolated to the requesting user's chunks.\n\n⚡ Consumes token budget (embedding query)."
+          },
+          "response": [
+            {
+              "name": "200 OK — Results",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"count\": 2,\n  \"data\": [\n    {\n      \"text\": \"Neural networks are a subset of machine learning inspired by the human brain...\",\n      \"confidenceScore\": 94.72,\n      \"documentId\": \"6645f2a3b1e2c3d4e5f60001\",\n      \"documentTitle\": \"Intro to Deep Learning\",\n      \"documentType\": \"PDF\",\n      \"documentUrl\": \"https://res.cloudinary.com/...\",\n      \"chunkIndex\": 3\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Synthesize Documents — Bulk Summary",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/ai/synthesize",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentIds\": [\n    \"{{docId}}\",\n    \"{{docIdB}}\"\n  ]\n}"
+            },
+            "description": "Combines summaries and tags of multiple documents into a single coherent narrative. Useful for getting a bird's-eye view of a folder or topic.\n\n⚡ Consumes token budget."
+          },
+          "response": [
+            {
+              "name": "200 OK — Synthesis",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"summary\": \"These documents collectively cover the fundamentals of neural network architectures and their financial applications in algorithmic trading. Document 1 provides the theoretical foundation of deep learning, while Document 2 explores quantitative finance strategies using ML models.\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📁 Folder AI  (/api/folders)",
+      "item": [
+        {
+          "name": "Propose Semantic Folder Tree (Full Library)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/folders/propose",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "description": "Auto-fetches ALL analyzed documents for the user (max 100, newest first) and clusters them into a hierarchical folder tree using GPT-4o-mini withStructuredOutput(). Pure read — no DB writes.\n\n⚡ Consumes token budget. No request body needed."
+          },
+          "response": [
+            {
+              "name": "200 OK — Proposed Tree",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Proposed 4 top-level folders for 12 documents.\",\n  \"data\": {\n    \"tree\": [\n      {\n        \"name\": \"Finance & Reporting\",\n        \"reason\": \"All invoices, tax documents, and quarterly reports share a financial administrative context.\",\n        \"documentIds\": [\"6645f2a3b1e2c3d4e5f60001\", \"6645f2a3b1e2c3d4e5f60002\"],\n        \"subfolders\": [\n          {\n            \"name\": \"Q1 Reports\",\n            \"reason\": \"January-March financial summaries grouped by quarter.\",\n            \"documentIds\": [\"6645f2a3b1e2c3d4e5f60003\", \"6645f2a3b1e2c3d4e5f60004\"]\n          }\n        ]\n      },\n      {\n        \"name\": \"AI & Machine Learning\",\n        \"reason\": \"Research papers and lecture notes covering deep learning and NLP topics.\",\n        \"documentIds\": [\"6645f2a3b1e2c3d4e5f60005\"],\n        \"subfolders\": []\n      }\n    ],\n    \"documentCount\": 12,\n    \"wasCapped\": false\n  }\n}"
+            },
+            {
+              "name": "200 OK — Not Enough Documents",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Not enough analyzed documents to generate a proposal. Upload and analyze at least 2 documents first.\",\n  \"data\": { \"tree\": [], \"documentCount\": 1 }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🔍 Comparison  (/api/comparison)",
+      "item": [
+        {
+          "name": "Compare Two Documents (DeepThinker)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/comparison/compare",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentIds\": [\"{{docId}}\", \"{{docIdB}}\"]\n}"
+            },
+            "description": "Runs a deep semantic comparison between two documents using Llama 3.3 70B (Groq). Falls back to Llama 3.1 8B on timeout. Both documents must belong to the requesting user."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"similarities\": [\"Both focus on supervised learning\"],\n    \"differences\": [\"Doc A covers regression, Doc B covers classification\"],\n    \"uniqueToA\": [\"Linear regression derivation\"],\n    \"uniqueToB\": [\"Decision tree pruning\"]\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/admin/stats",
+            "description": "Get global dashboard stats"
+          }
+        },
+        {
+          "name": "Get AI Usage",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/admin/ai-usage"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Track Event",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/analytics/track",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"eventName\":\"Page_View\",\"metadata\":{\"page\":\"/dashboard\"}}"
+            }
+          }
+        },
+        {
+          "name": "Get Top Pages",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/analytics/top-pages"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Settings & Payments",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/settings"
+          }
+        },
+        {
+          "name": "Payment Request",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/payments/request"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "<paste-your-jwt-token-here>",
+      "type": "string"
+    },
+    {
+      "key": "docId",
+      "value": "6645f2a3b1e2c3d4e5f60001",
+      "type": "string"
+    },
+    {
+      "key": "docIdB",
+      "value": "6645f2a3b1e2c3d4e5f60002",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  }
+}
