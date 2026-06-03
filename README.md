@@ -43,9 +43,9 @@
 <br/>
 
 [![Context Cloud API](https://img.shields.io/badge/🔗_Paired_With-Context_Cloud_API-4F46E5?style=flat-square)](https://github.com/Ahmed-ElKashif/Context-api)
-[![Context Web Frontend](https://img.shields.io/badge/🔗_Paired_With-Context_Web-61DAFB?style=flat-square)](https://github.com/youssef1232004/context-mvp-front)
-[![Context Mobile App](https://img.shields.io/badge/🔗_Paired_With-Context_Mobile-000020?style=flat-square)](https://github.com/youssef1232004/context-mobile)
-[![Context Desktop](https://img.shields.io/badge/🔗_Paired_With-Context_Desktop-2563EB?style=flat-square)](https://github.com/Ahmed-ElKashif/Context-Desktop)
+[![Context Web Frontend](https://img.shields.io/badge/🔗_Paired_With-Context_Web_Frontend-61DAFB?style=flat-square)](https://github.com/youssef1232004/context-mvp-front)
+[![Context Mobile App](https://img.shields.io/badge/🔗_Paired_With-Context_Mobile_App-000020?style=flat-square)](https://github.com/youssef1232004/context-mobile)
+[![Context Desktop App](https://img.shields.io/badge/🔗_Paired_With-Context_Desktop_App-2563EB?style=flat-square)](https://github.com/Ahmed-ElKashif/Context-Desktop)
 
 </div>
 
